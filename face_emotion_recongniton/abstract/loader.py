@@ -26,7 +26,7 @@ class Loader:
 
         raise NotImplementedError()
     
-    # 我看别人这么写，但其实对于咱们来说好像没什么用
+    # 虽然这么写对咱们没什么用就是了
 
     @property
     def path(self):
