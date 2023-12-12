@@ -1,15 +1,14 @@
 import torch
 import torch.nn as nn
 
-VGG16 = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
-VGG19 = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M']
+from ..utils import get_vgg
 
 class VGG(nn.Module):
 
     def __init__(self, cfg) -> None:
         super(VGG, self).__init__()
         self.features = self._make_layers(cfg)
-        self.fc = nn.Linear(512, 7)
+        self.fc = nn.Linear(512, 8)
 
     def _make_layers(self, cfg):
         layers = []
@@ -30,7 +29,7 @@ class VGG(nn.Module):
         return nn.Sequential(*layers)
 
     def forward(self, x):
-        out = self.features(x)
+        out = self.features(x.float())
         out = out.view(out.size(0), -1)
         out = nn.functional.dropout(out, p=0.5, training=self.training)
         out = self.fc(out)
@@ -41,9 +40,8 @@ class EmotionRecognition:
     '''
     使用VGG模型
 
-    # __init__ 中cfg是指使用VGG16还是VGG19
-    例子: 
-    cfg = VGG16 = [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M']
+    # __init__参数
+    cfg: 模型的配置文件'VGG16' 或者 'VGG19'
 
     # train:
     用于训练模型
@@ -55,9 +53,10 @@ class EmotionRecognition:
     用于检测模型的正确率, return accuracy of model
     '''
     def __init__(self, cfg) -> None:
-        
+        self.cfg = get_vgg(cfg)
+
         self.device = torch.device('cuda:0' if torch.cuda.is_available else 'cpu')
-        self.model = VGG(cfg).to(self.device)
+        self.model = VGG(self.cfg).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.001)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
@@ -83,7 +82,7 @@ class EmotionRecognition:
                         print(f'epoch: {epoch + 1}/{num_epochs}, step: {i}/{len(trainLoader)}, loss: {loss.item()}')
                 self.scheduler.step()
 
-            torch.save(self.model.state_dict(), 'emotion.pth')
+            torch.save(self.model.state_dict(), 'model_pth/emotion.pth')
             print('finish')
 
     def evaluate(self, test_loader):

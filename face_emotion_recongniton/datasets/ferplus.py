@@ -1,9 +1,9 @@
 import os
-import numpy as np
 
 from ..abstract import Loader, Dataset
-from ..utils import get_class_names, resize_image
-
+from ..utils import get_class_names, resize_image, get_trans
+from ..utils import greyToRGB
+from ..utils import numpy as np
 
 class FER_plus(Loader):
     """
@@ -93,10 +93,15 @@ class FER_plus_dataSet(Dataset):
         
         fer_plus = FER_plus(path, split, class_names, image_size)
         self.data = fer_plus.load_data()
+        self.trans = get_trans()
 
     def __getitem__(self, index):
 
         data = self.data[index]['image']
+        
+        data = greyToRGB(data)
+        data = self.trans(data)
+
         target = self.data[index]['label']
 
         return data, target
