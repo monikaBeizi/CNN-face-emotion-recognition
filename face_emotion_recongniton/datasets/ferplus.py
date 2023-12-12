@@ -11,12 +11,17 @@ class FER_plus(Loader):
     数据集来自:https://github.com/microsoft/FERPlus
     数据集的第二列特征就是改数据的用处, 因此用split来区分训练集,测试集,验证集
 
-    参数：
+    # 参数：
     path: 含有icml_face_data.csv(数据集) 和 fer2013new.csv(标签)的路径
     split: 用来区分数据集用途的
     class_names: 一个含有数据集中标签种类的列表
 
     image_size: 图片将要被改变的大小
+
+    # return
+    data: 返回处理好的数据,data是列表, 里面的每个图片和标签用字典分别来保存
+    'image': 图片像素的numpy数组
+    'emotion': 关于各项情绪的可能性的, 一行numpy数组
     """
 
     def __init__(self, path, split='train', class_names="ALL",
