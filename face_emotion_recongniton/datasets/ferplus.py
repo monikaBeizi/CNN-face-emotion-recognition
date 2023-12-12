@@ -1,7 +1,7 @@
 import os
 import numpy as np
 
-from ..abstract import Loader
+from ..abstract import Loader, Dataset
 from ..utils import get_class_names, resize_image
 
 
@@ -31,7 +31,7 @@ class FER_plus(Loader):
         if class_names == "ALL":
             class_names = get_class_names('FERplus')
         
-        super(FER_plus,self).__init__(self, path, split, class_names, 'FERplus')
+        super(FER_plus,self).__init__(path, split, class_names, 'FERplus')
 
         self.image_size = image_size
         self.images_path = os.path.join(self.path, 'icml_face_data.csv')
@@ -49,7 +49,7 @@ class FER_plus(Loader):
         data = data[ data[:, -2] == self.split_to_filter[self.split]]
 
         # 将加载的data 编程的形状变为(-1, 48, 48)
-        faces = np.zeros(len(data), *self.image_size)
+        faces = np.zeros((len(data), *self.image_size))
         for sample_arg, sample in enumerate(data):
             face = np.array(sample[2].split(' '), dtype=int).reshape(48, 48)
             face = resize_image(face, self.image_size)
@@ -68,8 +68,8 @@ class FER_plus(Loader):
         N = np.sum(emotions, axis=1)
 
         # 去除不含特征值的图片
-        mask = (N != 0)
-        N, face, emotions = N[mask], face[mask], emotions[mask]
+        mask = N != 0
+        N, face, emotions = N[mask], faces[mask], emotions[mask]
         
         # 对emotions标签的每一列进行归一化
         emotions = emotions / np.expand_dims(N, 1)
@@ -80,3 +80,27 @@ class FER_plus(Loader):
             sample = {'image': face, 'label': emotion}
             data.append(sample)
         return data
+    
+
+class FER_plus_dataSet(Dataset):
+    """
+    调用了同文件的FER_plus类来获取数据集, 然后转化成适合用于加载DataLoader类的Dataset类型
+    后续应该将其并入到FER_plus类中, FER_plus同时继承两个类
+    """
+    
+    def __init__(self, path, split='train', class_names="ALL",
+                  image_size=(48, 48)) -> None:
+        
+        fer_plus = FER_plus(path, split, class_names, image_size)
+        self.data = fer_plus.load_data()
+
+    def __getitem__(self, index):
+
+        data = self.data[index]['image']
+        target = self.data[index]['label']
+
+        return data, target
+    
+    def __len__(self):
+
+        return len(self.data)
