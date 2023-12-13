@@ -1,4 +1,4 @@
-from ..utils import numpy as np
+from ...utils import numpy as np
 
 def greyToRGB(image):
     """
