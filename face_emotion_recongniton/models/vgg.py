@@ -58,12 +58,12 @@ class EmotionRecognition:
         self.device = torch.device('cuda:0' if torch.cuda.is_available else 'cpu')
         self.model = VGG(self.cfg).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.01)
-        # self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.001, weight_decay=5e-4)
+        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
 
     def train(self, trainLoader, num_epochs, load=True):
         if load == True:
-            self.model.load_state_dict(torch.load('emotion.pth'))
+            self.model.load_state_dict(torch.load('emotion_v0.pth'))
             print('load finish')
 
         else:
@@ -79,11 +79,8 @@ class EmotionRecognition:
                     self.optimizer.step()
                     if i % 100 == 0:
                         print(f'epoch: {epoch + 1}/{num_epochs}, step: {i}/{len(trainLoader)}, loss: {loss.item()}')
-                        # print('out', torch.argmax(outputs, dim=1))
-                        # print('lab', torch.argmax(labels.reshape(-1, 8).float(), dim=1))
-                # self.scheduler.step()
-
-            torch.save(self.model.state_dict(), 'model_pth/emotion.pth')
+                self.scheduler.step()
+            torch.save(self.model.state_dict(), 'emotion_v0.pth')
             print('finish')
 
     def evaluate(self, test_loader):
@@ -95,7 +92,11 @@ class EmotionRecognition:
                 images, labels = data[0].to(self.device), data[1].to(self.device)
                 outputs = self.model.forward(images)
                 _, predicted = torch.max(outputs.data, 1)
-                total += labels.reshape(-1,).long().size(0)
-                correct += (predicted == labels.reshape(-1,).long()).sum().item()
+                total += 1
+                _, labels = torch.max(labels, 1)
+                print(total)
+                print(predicted)
+                print(labels)
+                correct += (predicted == labels).sum().item()
         accuracy = correct / total
         return accuracy

@@ -1,2 +1,2 @@
-from .ferplus2_0 import FER_plus
-from .ferplus2_0 import FER_plus_dataSet
+from .ferplus import FER_plus
+from .ferplus import FER_plus_dataSet

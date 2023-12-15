@@ -1,9 +1,10 @@
 import os
 
 from ..abstract import Loader, Dataset
-from ..utils import get_class_names, resize_image, get_trans
-from ..utils import greyToRGB
+from ..utils import get_class_names, get_trans, resize_image
+from ..utils import greyToRGB, extractLabels
 from ..utils import numpy as np
+from ..utils import pandas as pd
 
 class FER_plus(Loader):
     """
@@ -34,46 +35,34 @@ class FER_plus(Loader):
         super(FER_plus,self).__init__(path, split, class_names, 'FERplus')
 
         self.image_size = image_size
-        self.images_path = os.path.join(self.path, 'icml_face_data.csv')
+        self.images_path = os.path.join(self.path, 'fer2013.csv')
         self.labels_path = os.path.join(self.path, 'fer2013new.csv')
 
         self.split_to_filter = {
-            'train' : 'Training', 'val': 'PublicTest', 'test': 'PrivateTest'
+            'train' : 'Training', 'val': 'PublicTest', 'test': 'PrivateTest', 'all': 'All'
         }
 
     def load_data(self):
-        # 通过genfromtxt读取数据，第二列用处，第三列字符串形式的像素集合
-        data = np.genfromtxt(self.images_path, str, '#', ',', 1)
+        
+        # 读取数据和标签
+        images = pd.read_csv(self.images_path)
+        labels= pd.read_csv(self.labels_path)
 
-        # 加载对应self.split对应的数据
-        data = data[ data[:, -2] == self.split_to_filter[self.split]]
+        # 提取像素和标签，并把标签归一化
+        new_fer = extractLabels(images=images, labels=labels, split=self.split_to_filter[self.split])
 
-        # 将加载的data 编程的形状变为(-1, 48, 48)
-        faces = np.zeros((len(data), *self.image_size))
-        for sample_arg, sample in enumerate(data):
-            face = np.array(sample[2].split(' '), dtype=int).reshape(48, 48)
+        # 将图片放入data中,  reshape成(-1, 48, 48)
+        faces = np.zeros((len(new_fer['pixels']), *self.image_size))
+        for sample_arg, face in enumerate(new_fer['pixels']):
+            face = np.array(face.split(), dtype=int).reshape(48, 48)
             face = resize_image(face, self.image_size)
 
             faces[sample_arg, :, :] = face
 
-
-        # 从ferPlus 中去除emotion标签
-
-        emotions = np.genfromtxt(self.labels_path, str, '#', ',', 1)
-        # 从中去除 与self.split对应的标签
-        emotions = emotions[ emotions[:, 0] == self.split_to_filter[self.split]]
-        # 将数值化的特征提取出来
-        emotions = emotions[:, 2:10].astype(float)
-        # 对每一行求和用来归一化，并且分辨是否含有NULL行
-        N = np.sum(emotions, axis=1)
-
-        # 去除不含特征值的图片
-        mask = N != 0
-        N, face, emotions = N[mask], faces[mask], emotions[mask]
+        # 获取标签
+        emotions = new_fer[['neutral', 'happiness', 'surprise', 'sadness',
+       'anger', 'disgust', 'fear', 'contempt']].values
         
-        # 对emotions标签的每一列进行归一化
-        emotions = emotions / np.expand_dims(N, 1)
-
         # 返回处理好的数据,data是列表，里面的每个图片和标签用字典分别来保存
         data = []
         for face, emotion in zip(faces, emotions):
@@ -81,16 +70,15 @@ class FER_plus(Loader):
             data.append(sample)
         return data
     
-
 class FER_plus_dataSet(Dataset):
     """
     调用了同文件的FER_plus类来获取数据集, 然后转化成适合用于加载DataLoader类的Dataset类型
     后续应该将其并入到FER_plus类中, FER_plus同时继承两个类
     """
-    
+
     def __init__(self, path, split='train', class_names="ALL",
-                  image_size=(48, 48)) -> None:
-        
+                image_size=(48, 48)) -> None:
+    
         fer_plus = FER_plus(path, split, class_names, image_size)
         self.data = fer_plus.load_data()
         self.trans = get_trans()
@@ -105,7 +93,7 @@ class FER_plus_dataSet(Dataset):
         target = self.data[index]['label']
 
         return data, target
-    
+
     def __len__(self):
 
         return len(self.data)
