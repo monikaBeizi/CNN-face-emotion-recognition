@@ -58,8 +58,8 @@ class EmotionRecognition:
         self.device = torch.device('cuda:0' if torch.cuda.is_available else 'cpu')
         self.model = VGG(self.cfg).to(self.device)
         self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.001)
-        self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.01)
+        # self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
 
     def train(self, trainLoader, num_epochs, load=True):
         if load == True:
@@ -74,13 +74,14 @@ class EmotionRecognition:
                     images, labels = data[0].to(self.device), data[1].to(self.device)
                     self.optimizer.zero_grad()
                     outputs = self.model.forward(images)
-                    loss = self.criterion(outputs, labels.reshape(-1,).long())
+                    loss = self.criterion(outputs, labels.reshape(-1, 8).float())
                     loss.backward()
                     self.optimizer.step()
-
                     if i % 100 == 0:
                         print(f'epoch: {epoch + 1}/{num_epochs}, step: {i}/{len(trainLoader)}, loss: {loss.item()}')
-                self.scheduler.step()
+                        # print('out', torch.argmax(outputs, dim=1))
+                        # print('lab', torch.argmax(labels.reshape(-1, 8).float(), dim=1))
+                # self.scheduler.step()
 
             torch.save(self.model.state_dict(), 'model_pth/emotion.pth')
             print('finish')

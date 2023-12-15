@@ -1,4 +1,4 @@
-from ...utils import transforms
+from torchvision import transforms
 
 def get_trans():
     '''
