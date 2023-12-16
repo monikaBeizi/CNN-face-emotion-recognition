@@ -61,6 +61,7 @@ class EmotionRecognition:
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr = 0.001, weight_decay=5e-4)
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optimizer, step_size=30, gamma=0.1)
 
+    # 用于训练模型
     def train(self, trainLoader, num_epochs, load=True):
         if load == True:
             self.model.load_state_dict(torch.load('emotion_v0.pth'))
@@ -83,6 +84,7 @@ class EmotionRecognition:
             torch.save(self.model.state_dict(), 'emotion_v0.pth')
             print('finish')
 
+    # 用于评估模型的方法
     def evaluate(self, test_loader):
         self.model.eval()
         correct = 0
@@ -94,9 +96,20 @@ class EmotionRecognition:
                 _, predicted = torch.max(outputs.data, 1)
                 total += 1
                 _, labels = torch.max(labels, 1)
-                print(total)
-                print(predicted)
-                print(labels)
                 correct += (predicted == labels).sum().item()
         accuracy = correct / total
         return accuracy
+    
+    # 用于使用模型
+    def predict(self, image):
+        """
+        用这个方法来使用模型预测传入的image图像
+
+        # 参数:
+        image: 形状为torch.Size([3, 44, 44])
+
+        # return :
+        返回的是预测值
+        """
+
+    
