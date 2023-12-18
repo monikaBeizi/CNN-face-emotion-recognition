@@ -3,3 +3,7 @@ data/
 
 face_emotion_recongniton/test.ipynb
 test.ipynb
+*.pyc
+test2_0.ipynb
+copy.csv
+testFer.csv
