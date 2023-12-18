@@ -64,7 +64,7 @@ class EmotionRecognition:
     # 用于训练模型
     def train(self, trainLoader, num_epochs, load=True):
         if load == True:
-            self.model.load_state_dict(torch.load('emotion_v0.pth'))
+            self.model.load_state_dict(torch.load('../data/emotion_v0.pth'))
             print('load finish')
 
         else:
@@ -81,7 +81,7 @@ class EmotionRecognition:
                     if i % 100 == 0:
                         print(f'epoch: {epoch + 1}/{num_epochs}, step: {i}/{len(trainLoader)}, loss: {loss.item()}')
                 self.scheduler.step()
-            torch.save(self.model.state_dict(), 'emotion_v0.pth')
+            torch.save(self.model.state_dict(), '../data/emotion_v0.pth')
             print('finish')
 
     # 用于评估模型的方法
@@ -98,12 +98,15 @@ class EmotionRecognition:
                 _, labels = torch.max(labels, 1)
                 correct += (predicted == labels).sum().item()
         accuracy = correct / total
+        print("The accuracy of model is:", accuracy)
         return accuracy
     
     # 用于使用模型
     def predict(self, image):
         """
         用这个方法来使用模型预测传入的image图像
+        不过因为训练的图片都是灰度图像, 所以期望传进来的图片也最好是
+        三个灰度图像拼接成的RGB图像
 
         # 参数:
         image: 形状为torch.Size([3, 44, 44])
@@ -112,4 +115,9 @@ class EmotionRecognition:
         返回的是预测值
         """
 
-    
+        self.model.eval()
+        with torch.no_grad():
+            image = image.to(self.device)
+            outputs = self.model.forward(image)
+            _, predicted = torch.max(outputs.data, 1)
+        return int(predicted)

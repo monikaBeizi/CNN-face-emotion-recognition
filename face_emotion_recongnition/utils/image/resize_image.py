@@ -22,4 +22,4 @@ def resize_image(image, size, method=BILINEAR):
         )
     
     else:
-        return cv2.resize(image, size, interpolation=method)
+        return cv2.resize(image, size, interpolation=method).astype(int)
