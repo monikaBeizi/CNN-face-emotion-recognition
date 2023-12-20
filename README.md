@@ -1,1 +1,2 @@
-目前VGG在ferplus 的PublicTest上的正确率为0.84
+通过YOLOv8在摄像上对人脸面都进行情绪识别，并显示出来
+目前使用的情绪分析模型VGG在ferplus的PublicTest上的正确率为0.84
