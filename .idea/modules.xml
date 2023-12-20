@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-<<<<<<< Updated upstream
-      <module fileurl="file://$PROJECT_DIR$/.idea/项目.iml" filepath="$PROJECT_DIR$/.idea/项目.iml" />
-=======
-      <module fileurl="file://$PROJECT_DIR$/.idea/CNN-face-emotion-recognition.iml" filepath="$PROJECT_DIR$/.idea/CNN-face-emotion-recognition.iml" />
->>>>>>> Stashed changes
+      <module fileurl="file://$PROJECT_DIR$/.idea/CNN-face-emotion-recognition-ez_version.iml" filepath="$PROJECT_DIR$/.idea/CNN-face-emotion-recognition-ez_version.iml" />
     </modules>
   </component>
 </project>

@@ -7,8 +7,6 @@
           <option value="N802" />
           <option value="N806" />
           <option value="N803" />
-<<<<<<< Updated upstream
-=======
           <option value="N801" />
         </list>
       </option>
@@ -17,7 +15,6 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="object.*" />
->>>>>>> Stashed changes
         </list>
       </option>
     </inspection_tool>

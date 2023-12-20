@@ -1,6 +1,5 @@
-import os
-import cv2
-import numpy as np
+from ...utils import os, cv2
+from ...utils import numpy as np
 
 BILINEAR = cv2.INTER_LINEAR
 
@@ -23,4 +22,4 @@ def resize_image(image, size, method=BILINEAR):
         )
     
     else:
-        return cv2.resize(image, size, interpolation=method)
+        return cv2.resize(image, size, interpolation=method).astype(int)

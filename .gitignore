@@ -2,5 +2,11 @@
 data/
 
 face_emotion_recongniton/test.ipynb
-data.zip
-*.zip
+test.ipynb
+*.pyc
+test2_0.ipynb
+copy.csv
+testFer.csv
+*.xml
+5555.py
+*.pyc

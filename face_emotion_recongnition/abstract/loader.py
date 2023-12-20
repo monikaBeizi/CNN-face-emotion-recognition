@@ -43,7 +43,7 @@ class Loader:
     
     @split.setter
     def split(self, split):
-        self._path = split
+        self._split = split
 
 
     @property

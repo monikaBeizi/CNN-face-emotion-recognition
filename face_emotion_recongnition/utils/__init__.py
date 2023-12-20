@@ -1,4 +1,4 @@
-import numpy 
+import numpy
 import os
 import cv2
 import pandas
@@ -12,8 +12,8 @@ from .image.greyToRGB import greyToRGB
 from .image.trans_predict import trans_predict
 from .extractLabels import extractLabels
 from .normalization import normalization
-from .cut_img import cut_image
-from .plot_boxes import plot_boxes
+from .image.cut_img import cut_image
+from .image.plot_boxes import plot_boxes
 
 from PIL import Image
 from sklearn.preprocessing import LabelEncoder
