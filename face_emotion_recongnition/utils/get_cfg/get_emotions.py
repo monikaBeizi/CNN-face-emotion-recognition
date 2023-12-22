@@ -18,7 +18,7 @@ def get_emotions(predict):
 
     emotions = {
         0: 'neutral', 1: 'happiness', 2: 'surprise', 3: 'sadness',
-        4: 'anger', 5: 'disgust', 6: 'fear', 7:'contempt'
+        4: 'anger', 5: 'anger', 6: 'fear', 7:'contempt'
     }
 
     return emotions[predict]
